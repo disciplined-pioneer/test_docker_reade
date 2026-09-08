@@ -8,4 +8,4 @@ services:
 
     container_name: test-log-generator
 
-    restart: unless-stoppedЦ
+    restart: unless-stopped
