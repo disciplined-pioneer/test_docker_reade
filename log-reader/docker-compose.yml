@@ -1,15 +1,14 @@
 version: "3.8"
 
 services:
-  log-generator:
+  log-reader:
     build:
       context: .
       dockerfile: Dockerfile
 
-    container_name: test-log-generator
+    container_name: test-log-reader
 
     restart: unless-stopped
 
-    labels:
-      - "fixops.enabled=true"
-      - "fixops.project_folder=log-generator"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
