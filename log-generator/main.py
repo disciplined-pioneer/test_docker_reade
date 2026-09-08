@@ -1,65 +1,59 @@
-import docker
+import logging
+import random
 import time
-import traceback
+
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(message)s",
+)
+
+logger = logging.getLogger("test-app")
+
+
+INFO_MESSAGES = [
+    "User successfully authenticated",
+    "Request processed successfully",
+    "Background task completed",
+    "Cache updated",
+    "Worker is running",
+]
+
+WARNING_MESSAGES = [
+    "High memory usage detected",
+    "Slow database response",
+    "Retrying external request",
+    "Cache miss rate is high",
+]
+
+ERROR_MESSAGES = [
+    "Database connection failed",
+    "Failed to process request",
+    "Connection to Redis refused",
+    "Internal application error",
+    "Payment service unavailable",
+]
+
+
+def generate_log():
+    log_type = random.choice(["info", "info", "info", "warning", "error"])
+
+    if log_type == "info":
+        logger.info(random.choice(INFO_MESSAGES))
+
+    elif log_type == "warning":
+        logger.warning(random.choice(WARNING_MESSAGES))
+
+    elif log_type == "error":
+        logger.error(random.choice(ERROR_MESSAGES))
 
 
 def main():
-    print("=== LOG READER STARTED ===", flush=True)
+    logger.info("Test log generator started")
 
-    try:
-        print("Connecting to Docker...", flush=True)
-
-        client = docker.from_env()
-
-        print("Connected to Docker!", flush=True)
-
-        while True:
-            print("Scanning containers...", flush=True)
-
-            containers = client.containers.list(
-                filters={
-                    "label": "fixops.enabled=true"
-                }
-            )
-
-            print(
-                f"Found {len(containers)} target container(s)",
-                flush=True
-            )
-
-            for container in containers:
-                print(
-                    f"Container: {container.name}",
-                    flush=True
-                )
-
-                logs = container.logs(
-                    tail=10,
-                    timestamps=True,
-                ).decode(
-                    "utf-8",
-                    errors="replace"
-                )
-
-                for line in logs.splitlines():
-                    if "ERROR" in line.upper():
-                        print(
-                            f"[FOUND ERROR] {line}",
-                            flush=True
-                        )
-                    else:
-                        print(
-                            f"[LOG] {line}",
-                            flush=True
-                        )
-
-            print("Waiting 3 seconds...\n", flush=True)
-
-            time.sleep(3)
-
-    except Exception:
-        print("!!! READER ERROR !!!", flush=True)
-        traceback.print_exc()
+    while True:
+        generate_log()
+        time.sleep(3)
 
 
 if __name__ == "__main__":
