@@ -1,0 +1,15 @@
+version: "3.8"
+
+services:
+  log-generator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: test-log-generator
+
+    restart: unless-stopped
+
+    labels:
+      - "fixops.enabled=true"
+      - "fixops.project_folder=log-generator"
