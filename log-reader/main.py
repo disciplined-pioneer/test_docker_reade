@@ -1,12 +1,20 @@
 import docker
+import logging
+import time
+
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(message)s",
+)
+
+logger = logging.getLogger("fixops-reader")
 
 
 def main():
-    client = docker.from_env()
+    logger.info("FixOps Log Reader started")
 
-    print("Log Reader started")
-    print("Looking for containers with label: fixops.enabled=true")
-    print()
+    client = docker.from_env()
 
     while True:
         containers = client.containers.list(
@@ -15,21 +23,38 @@ def main():
             }
         )
 
+        logger.info(
+            "Found %d target container(s)",
+            len(containers),
+        )
+
         for container in containers:
-            print(f"--- Reading logs from: {container.name} ---")
+            logger.info(
+                "Reading logs from %s",
+                container.name,
+            )
 
             logs = container.logs(
-                tail=20,
+                tail=10,
                 timestamps=True,
-            ).decode("utf-8", errors="replace")
+            ).decode(
+                "utf-8",
+                errors="replace",
+            )
 
             for line in logs.splitlines():
                 if "ERROR" in line.upper():
-                    print(f"[FOUND ERROR] {line}")
+                    logger.error(
+                        "[FOUND ERROR] %s",
+                        line,
+                    )
                 else:
-                    print(f"[LOG] {line}")
+                    logger.info(
+                        "[LOG] %s",
+                        line,
+                    )
 
-            print()
+        time.sleep(3)
 
 
 if __name__ == "__main__":
